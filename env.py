@@ -22,12 +22,12 @@ class EmailEnv:
                 ("Meeting scheduled tomorrow", "Work"),
             ],
             "medium": [
-                ("Your bank account alert", "Finance"),
-                ("Join our community event", "Social"),
+                ("URGENT: Your bank account has suspicious activity", "Finance"),
+                ("Join our community networking event", "Social"),
             ],
             "hard": [
-                ("Limited time job opportunity apply now", "Job"),
-                ("Important project deadline approaching", "Work"),
+                ("Final interview scheduled tomorrow with HR", "Job"),
+                ("Critical project deadline approaching, submit ASAP", "Work"),
             ]
         }
 
@@ -39,12 +39,15 @@ class EmailEnv:
     def step(self, action: Action):
         email, correct = self.data[self.task][self.index]
 
-        if action.category.lower() == correct.lower():
+        predicted = action.category.lower()
+        correct = correct.lower()
+
+        if predicted == correct:
             reward = 1.0
-        elif action.category.lower() in correct.lower():
+        elif correct in predicted:
             reward = 0.5
         else:
-            reward = 0.0
+            reward = -0.2  # penalty
 
         self.index += 1
         done = self.index >= len(self.data[self.task])

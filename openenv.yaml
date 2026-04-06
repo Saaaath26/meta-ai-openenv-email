@@ -1,5 +1,5 @@
 name: email_triage_env
-description: Email classification environment
+description: Real-world email classification environment
 
 tasks:
   - name: easy
