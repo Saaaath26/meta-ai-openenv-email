@@ -1,0 +1,15 @@
+name: email_triage_env
+description: Email classification environment
+
+tasks:
+  - name: easy
+  - name: medium
+  - name: hard
+
+observation_space:
+  type: object
+
+action_space:
+  type: object
+
+reward_range: [0.0, 1.0]
