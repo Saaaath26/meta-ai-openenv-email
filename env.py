@@ -42,12 +42,15 @@ class EmailEnv:
         predicted = action.category.lower()
         correct = correct.lower()
 
+        # 🔥 SMART REWARD
         if predicted == correct:
             reward = 1.0
         elif correct in predicted:
             reward = 0.5
+        elif predicted in ["promotions", "social"]:
+            reward = 0.2   # soft mistake
         else:
-            reward = -0.2  # penalty
+            reward = -0.3  # strong penalty
 
         self.index += 1
         done = self.index >= len(self.data[self.task])

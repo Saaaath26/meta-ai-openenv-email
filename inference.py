@@ -1,15 +1,19 @@
-import os
 import requests
-from openai import OpenAI
+from transformers import pipeline
+import matplotlib.pyplot as plt
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# FREE AI MODEL
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 BASE_URL = "http://localhost:8000"
 
 TASKS = ["easy", "medium", "hard"]
+CATEGORIES = ["Promotions", "Work", "Finance", "Social", "Job"]
+
+all_scores = []
 
 for task in TASKS:
-    print(f"[START] task={task}")
+    print(f"\n[START] task={task}")
 
     res = requests.post(BASE_URL + "/reset")
     obs = res.json()
@@ -19,21 +23,8 @@ for task in TASKS:
     for step in range(5):
         email_text = obs["email"]
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an email classification assistant. Categories: Promotions, Work, Finance, Social, Job."
-                },
-                {
-                    "role": "user",
-                    "content": f"Classify this email into one category: {email_text}"
-                }
-            ]
-        )
-
-        category = response.choices[0].message.content.strip()
+        result = classifier(email_text, CATEGORIES)
+        category = result["labels"][0]
 
         action = {"category": category}
 
@@ -45,7 +36,9 @@ for task in TASKS:
 
         rewards.append(reward)
 
-        print(f"[STEP] step={step} action={category} reward={reward:.2f} done={done}")
+        # 🔥 EXPLANATION OUTPUT
+        print(f"\nEmail: {email_text}")
+        print(f"Predicted: {category} | Reward: {reward:.2f}")
 
         if done:
             break
@@ -53,4 +46,16 @@ for task in TASKS:
         obs = data["observation"]
 
     score = sum(rewards) / len(rewards)
-    print(f"[END] score={score:.2f}\n")
+    all_scores.append(score)
+
+    print(f"[END] score={score:.2f}")
+
+# 📊 GRAPH
+plt.plot(TASKS, all_scores, marker='o')
+plt.title("Agent Performance Across Tasks")
+plt.xlabel("Task Difficulty")
+plt.ylabel("Score")
+plt.grid()
+
+plt.savefig("performance.png")
+print("\n📊 Graph saved as performance.png")
