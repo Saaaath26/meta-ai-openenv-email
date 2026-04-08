@@ -8,7 +8,8 @@ dependencies = [
     "pydantic",
     "requests",
     "openenv-core",
-    "openai"
+    "openai",
+    "google-auth-oauthlib"
 ]
 
 [project.scripts]
